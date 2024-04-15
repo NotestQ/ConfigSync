@@ -31,9 +31,15 @@ namespace ConfigSync
             }
         }
 
+        /// <summary>
+        /// Creates a config if it is the host or syncs existing lobby configs if not
+        /// </summary>
+        /// <param name="configGUID"></param>
+        /// <param name="value"></param>
         internal static void CreateOrSyncConfig(string configGUID, object? value = null)
         {
             Configuration config = GetConfigOfGUID(configGUID);
+            if (config == null) return;
 
             if (MyceliumNetwork.IsHost)
             {
@@ -42,17 +48,22 @@ namespace ConfigSync
                 return;
             }
             // Sync settings
-            ConfigStartup.Logger.LogWarning($"Config type: {config.ConfigType}");
+            ConfigStartup.Logger.LogDebug($"Config type: {config.ConfigType}");
             var method = typeof(MyceliumNetwork).GetMethod(nameof(MyceliumNetwork.GetLobbyData), BindingFlags.Static | BindingFlags.Public);
-            ConfigStartup.Logger.LogWarning($"Is method null?: {method == null}");
             var genericMethod = method.MakeGenericMethod(config.ConfigType);
             var result = genericMethod.Invoke(null, [configGUID]);
+            ConfigStartup.Logger.LogDebug($"Got value {result}");
 
-            ConfigStartup.Logger.LogWarning($"Got value {result}");
             if (result == null) return;
+
             config.UpdateValue(result);
         }
 
+        /// <summary>
+        /// Internal. Register lobby data using the GUID as a key and creates/syncs the config if in lobby, if not in lobby it gets deferred until a lobby is joined
+        /// </summary>
+        /// <param name="configGUID"></param>
+        /// <param name="initialValue"></param>
         internal static void AddOrDeferConfig(string configGUID, object initialValue)
         {
             MyceliumNetwork.RegisterLobbyDataKey(configGUID);
@@ -66,12 +77,22 @@ namespace ConfigSync
             configDeferDictionary.Add(configGUID, initialValue);
         }
 
+        /// <summary>
+        /// Gets a created Configuration from the config list from its name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns>Returns an existing Configuration matching the provided name</returns>
         public static Configuration GetConfigOfName(string name)
         {
             // If this was lua I could do GetConfigFromVar(string variable) and do match[variable] but this is not lua i miss lua kinda a bit
             return configList.Find(match => match.ConfigName == name);
         }
 
+        /// <summary>
+        /// Gets a created Configuration from the config list from its GUID
+        /// </summary>
+        /// <param name="GUID"></param>
+        /// <returns>Returns an existing Configuration matching the provided GUID</returns>
         public static Configuration GetConfigOfGUID(string GUID)
         {
             return configList.Find(match => match.ConfigGUID == GUID);
