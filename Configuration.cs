@@ -1,6 +1,7 @@
 ﻿using BepInEx.Logging;
 using MyceliumNetworking;
 using System;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace ConfigSync
 {
@@ -11,7 +12,7 @@ namespace ConfigSync
             ConfigGUID = GUID;
             CurrentValue = initialValue;
             ConfigType = initialValue.GetType();
-
+            ConfigStartup.Logger.LogWarning($"Config created by end user, initial value {initialValue}");
             Synchronizer.configList.Add(this);
             Synchronizer.AddOrDeferConfig(ConfigGUID, initialValue);
         }
@@ -33,6 +34,7 @@ namespace ConfigSync
         /// <param name="value"></param>
         public void SetValue(object value)
         {
+            ConfigStartup.Logger.LogWarning($"Value set by end user, value {value}");
             CurrentValue = value;
             if (MyceliumNetwork.InLobby && MyceliumNetwork.IsHost)
             {
