@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using MyceliumNetworking;
+using Sirenix.Serialization;
 
 namespace ConfigSync
 {
@@ -41,7 +42,9 @@ namespace ConfigSync
                 return;
             }
             // Sync settings
+            ConfigStartup.Logger.LogWarning($"Config type: {config.ConfigType}");
             var method = typeof(MyceliumNetwork).GetMethod(nameof(MyceliumNetwork.GetLobbyData), BindingFlags.Static | BindingFlags.Public);
+            ConfigStartup.Logger.LogWarning($"Is method null?: {method == null}");
             var genericMethod = method.MakeGenericMethod(config.ConfigType);
             var result = genericMethod.Invoke(null, [configGUID]);
 
