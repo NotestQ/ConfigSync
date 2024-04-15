@@ -41,7 +41,7 @@ namespace ConfigSync
         /// <summary>
         /// Called when the config's value is changed by Mycelium
         /// </summary>
-        public static event Action<object>? ConfigChanged;
+        public event Action<object>? ConfigChanged;
 
         public string ConfigName;
         public string ConfigGUID;
