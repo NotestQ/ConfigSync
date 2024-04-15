@@ -12,7 +12,7 @@ namespace ConfigSync
             ConfigType = initialValue.GetType();
 
             Synchronizer.configList.Add(this);
-            Synchronizer.AddOrDeferConfig( ConfigGUID, initialValue);
+            Synchronizer.AddOrDeferConfig(ConfigGUID, initialValue);
         }
 
         /// <summary>
