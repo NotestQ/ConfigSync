@@ -41,9 +41,11 @@ namespace ConfigSync
                 return;
             }
             // Sync settings
-            object newValue = typeof(MyceliumNetwork).GetMethod(nameof(MyceliumNetwork.GetLobbyData), BindingFlags.Static | BindingFlags.Public)
+            object? newValue = typeof(MyceliumNetwork).GetMethod(nameof(MyceliumNetwork.GetLobbyData), BindingFlags.Static | BindingFlags.Public)
                  ?.MakeGenericMethod(config.ConfigType)
-                 ?.Invoke(null, [configGUID])!;
+                 ?.Invoke(null, [configGUID]);
+            ConfigStartup.Logger.LogWarning($"Got value {newValue}");
+            if (newValue == null) return;
             config.UpdateValue(newValue);
         }
 

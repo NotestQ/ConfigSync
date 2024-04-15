@@ -1,4 +1,5 @@
-﻿using MyceliumNetworking;
+﻿using BepInEx.Logging;
+using MyceliumNetworking;
 using System;
 
 namespace ConfigSync
@@ -21,6 +22,7 @@ namespace ConfigSync
         /// <param name="value"></param>
         internal void UpdateValue(object value)
         {
+            ConfigStartup.Logger.LogWarning($"Value updated internally, new value: {value}, old value: {CurrentValue}");
             CurrentValue = value;
             ConfigChanged?.Invoke(CurrentValue);
         }
