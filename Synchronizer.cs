@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using MyceliumNetworking;
-using Sirenix.Serialization;
 
 namespace ConfigSync
 {
@@ -19,6 +18,20 @@ namespace ConfigSync
                 CreateOrSyncConfig(entry.Key, entry.Value);
             }
             return;
+        }
+
+        /// <summary>
+        /// Once a player leaves a lobby we reset the CurrentValue back to InitialValue
+        /// InitialValue can be set by SetValue if not the host, ContentValue cannot as it is the temporary config that mirrors the host's config
+        /// Which means InitialValue is the absolute truth (the config the player wants to have, not the temporary config)
+        /// </summary>
+        internal static void OnLobbyLeft()
+        {
+            for (int i = 0; i < configList.Count; i++)
+            {
+                Configuration config = configList[i];
+                config.UpdateValue(config.InitialValue);
+            }
         }
 
         internal static void OnLobbyDataUpdated(List<string> changedKeys)

@@ -22,8 +22,9 @@ namespace ConfigSync
             Instance = this;
 
             MyceliumNetwork.RegisterNetworkObject(this, modID);
-            MyceliumNetwork.LobbyEntered += Synchronizer.OnLobbyEntered;
             MyceliumNetwork.LobbyDataUpdated += Synchronizer.OnLobbyDataUpdated;
+            MyceliumNetwork.LobbyEntered += Synchronizer.OnLobbyEntered;
+            MyceliumNetwork.LobbyLeft += Synchronizer.OnLobbyLeft;
 
             Patch();
             Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
