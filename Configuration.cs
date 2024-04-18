@@ -5,6 +5,12 @@ namespace ConfigSync
 {
     public class Configuration
     {
+        /// <summary>
+        /// Creates a new configuration with the value provided.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="GUID"></param>
+        /// <param name="initialValue"></param>
         public Configuration(string name, string GUID, object initialValue) {
             ConfigName = name;
             ConfigGUID = GUID;
