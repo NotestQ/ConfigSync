@@ -20,4 +20,4 @@ If the mod is throwing an error use [the github issues page](https://github.com/
 
 ## Credits
 
-Big thanks to [Day A.K.A. www.day.dream](https://thunderstore.io/c/content-warning/p/www_Day_Dream/) for helping me test the API!
+Big thanks to [Day A.K.A. www.day.dream](https://thunderstore.io/c/content-warning/p/www_Day_Dream/) for helping me test the library and helping me with reflection!
