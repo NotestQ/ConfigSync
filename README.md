@@ -10,13 +10,13 @@ Download the [latest dll](https://github.com/NotestQ/ConfigSync/releases/latest)
 public class YourMod : BaseUnityPlugin { // ...
 ```  
 
-And for in-depth documentation, check out the [documentation](https://github.com/NotestQ/ConfigSync/wiki/ConfigSync-Documentation) or one of the demos! Demos available are the [BepInEx config branch](https://github.com/NotestQ/ConfigSync) and the [ContentSettings config branch](https://github.com/NotestQ/ConfigSync)
+And for in-depth documentation, check out the [documentation](https://github.com/NotestQ/ConfigSync/wiki/ConfigSync-Documentation) or one of the demos! Demos available are the [BepInEx config branch](https://github.com/NotestQ/ConfigSync-Demo/tree/master) and the [ContentSettings config branch](https://github.com/NotestQ/ConfigSync-Demo/tree/feat_ContentSettingsCompatibility)
 
 ## Does this add something?
 By itself, no — this is an API for mod developers to _temporarily_ sync settings/configurations from the host to other players when in a lobby.
 
 ## It doesn't work
-If the mod is throwing an error use [the github issues page](https://github.com/NotestQ/ConfigSync//issues) and copy-paste the error in there, with a description of what is happening and what you expected to happen if applicable. Or just ping me at the Content Warning Modding Discord server!
+If the mod is throwing an error use [the github issues page](https://github.com/NotestQ/ConfigSync/issues) and copy-paste the error in there, with a description of what is happening and what you expected to happen if applicable. Or just ping me at the Content Warning Modding Discord server!
 
 ## Credits
 
