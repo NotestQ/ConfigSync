@@ -1,4 +1,5 @@
 # ConfigSync
+Tool for Content Warning mod developers to temporarily sync host configs with other players in a lobby.  
 
 ## Dependencies
 This depends on [Mycelium](https://github.com/RugbugRedfern/Mycelium-Networking-For-Content-Warning)!  
