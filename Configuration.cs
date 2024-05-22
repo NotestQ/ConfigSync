@@ -20,12 +20,17 @@ namespace ConfigSync
 
             ConfigStartup.Logger.LogDebug($"Config created by end user, initial value: {initialValue}");
 
-            Synchronizer.configList.Add(this);
-            Synchronizer.AddOrDeferConfig(ConfigGUID, initialValue);
+            Synchronizer.ConfigList.Add(this);
+
+            if (MyceliumNetwork.InLobby)
+            {
+                Synchronizer.SyncConfig(ConfigGUID, CurrentValue);
+            }
         }
 
         /// <summary>
-        /// Updates the current value internally and invokes the ConfigChanged event making it possible to handle it in your own way
+        /// Updates the current value internally and invokes the ConfigChanged event making it possible for the end user to
+        /// handle updates in a custom manner
         /// </summary>
         /// <param name="value"></param>
         internal void UpdateValue(object value)
@@ -53,12 +58,12 @@ namespace ConfigSync
             CurrentValue = value;
             if (MyceliumNetwork.InLobby && MyceliumNetwork.IsHost)
             {
-                Synchronizer.CreateOrSyncConfig(ConfigGUID, CurrentValue);
+                Synchronizer.SyncConfig(ConfigGUID, CurrentValue);
             }
         }
 
         /// <summary>
-        /// Called when the config's value is changed by Mycelium
+        /// Called when the config's value is changed internally by UpdateValue
         /// </summary>
         public event Action<object>? ConfigChanged;
 
@@ -69,3 +74,4 @@ namespace ConfigSync
         public Type ConfigType;
     }
 }
+

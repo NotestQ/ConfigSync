@@ -1,23 +1,38 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 using MyceliumNetworking;
+using Steamworks;
+
+/*
+ * Player B is the host in the following cases
+ *
+ * Player A joins Player B's lobby
+ * Player A requests Player B's data for given config GUID (Player B gets RequestSync and sends Player A ReceiveSync)
+ * Player B sends Player A the data (Player A gets ReceiveSync)
+ * | Alternatively |
+ * Player B detects that Player A joined the lobby
+ * Player B sends Player A the data (Player A gets ReceiveSync)
+ *
+ * Both ways should be implemented so a user or developer can request sync if needed, but the latter should be used for sync when someone joins
+ * Situation A is player -> host | Situation B is player -> host -> player
+ *
+ * Currently there is only one case where a player requests sync, when a config is created while they're already in a lobby
+ */
 
 namespace ConfigSync
 {
     public static class Synchronizer
     {
-        // GUID, Value
-        internal static Dictionary<string, object> configDeferDictionary = new Dictionary<string, object>();
-        internal static List<Configuration> configList = new List<Configuration>();
+        public static List<Configuration> ConfigList = new List<Configuration>();
 
-        internal static void OnLobbyEntered()
+        internal static void OnPlayerEntered(CSteamID cSteamID)
         {
-            // CLogger.LogDebug($"Lobby joined, temporary event list count: {TemporaryEventList.Count}");
-            foreach (KeyValuePair<string, object> entry in configDeferDictionary)
+            if (!MyceliumNetwork.IsHost || MyceliumNetwork.LobbyHost == cSteamID)
+                return;
+
+            foreach (Configuration configuration in ConfigList)
             {
-                CreateOrSyncConfig(entry.Key, entry.Value);
+                ConfigStartup.RPCTargetRelay(nameof(ConfigStartup.ReceiveSync), cSteamID, configuration.ConfigGUID, configuration.ConfigType, configuration.CurrentValue);
             }
-            return;
         }
 
         /// <summary>
@@ -27,67 +42,42 @@ namespace ConfigSync
         /// </summary>
         internal static void OnLobbyLeft()
         {
-            for (int i = 0; i < configList.Count; i++)
+            for (int i = 0; i < ConfigList.Count; i++)
             {
-                Configuration config = configList[i];
+                Configuration config = ConfigList[i];
                 config.UpdateValue(config.InitialValue);
             }
         }
 
-        internal static void OnLobbyDataUpdated(List<string> changedKeys)
-        {
-            if (MyceliumNetwork.IsHost) return;
-
-            for (int i = 0; i < changedKeys.Count; i++)
-            {
-                CreateOrSyncConfig(changedKeys[i]);
-            }
-        }
-
         /// <summary>
-        /// Creates a config if it is the host or syncs existing lobby configs if not
+        /// Syncs existing configs with the host if player, if host syncs configs with every player in the lobby
         /// </summary>
         /// <param name="configGUID"></param>
         /// <param name="value"></param>
-        internal static void CreateOrSyncConfig(string configGUID, object? value = null)
+        internal static void SyncConfig(string configGUID, object? value = null)
         {
-            Configuration config = GetConfigOfGUID(configGUID);
+            if (!MyceliumNetwork.InLobby)
+            {
+                ConfigStartup.Logger.LogWarning($"SyncConfig called but was not in lobby!");
+                return;
+            }
+
+            Configuration? config = GetConfigOfGUID(configGUID);
             if (config == null) return;
 
             if (MyceliumNetwork.IsHost)
             {
-                // Create settings
-                MyceliumNetwork.SetLobbyData(configGUID, value!);
+                foreach (CSteamID cSteamID in MyceliumNetwork.Players)
+                {
+                    if (MyceliumNetwork.LobbyHost == cSteamID)
+                        continue;
+
+                    ConfigStartup.RPCTargetRelay(nameof(ConfigStartup.ReceiveSync), cSteamID, configGUID, config.ConfigType, value!);
+                }
                 return;
             }
-            // Sync settings
-            ConfigStartup.Logger.LogDebug($"Config type: {config.ConfigType}");
-            var method = typeof(MyceliumNetwork).GetMethod(nameof(MyceliumNetwork.GetLobbyData), BindingFlags.Static | BindingFlags.Public);
-            var genericMethod = method.MakeGenericMethod(config.ConfigType);
-            var result = genericMethod.Invoke(null, [configGUID]);
-            ConfigStartup.Logger.LogDebug($"Got value {result}");
 
-            if (result == null) return;
-
-            config.UpdateValue(result);
-        }
-
-        /// <summary>
-        /// Internal. Register lobby data using the GUID as a key and creates/syncs the config if in lobby, if not in lobby it gets deferred until a lobby is joined
-        /// </summary>
-        /// <param name="configGUID"></param>
-        /// <param name="initialValue"></param>
-        internal static void AddOrDeferConfig(string configGUID, object initialValue)
-        {
-            MyceliumNetwork.RegisterLobbyDataKey(configGUID);
-            if (MyceliumNetwork.InLobby)
-            {
-                CreateOrSyncConfig(configGUID, initialValue);
-                return;
-            }
-            // Defer
-
-            configDeferDictionary.Add(configGUID, initialValue);
+            ConfigStartup.RPCTargetRelay(nameof(ConfigStartup.RequestSync), MyceliumNetwork.LobbyHost, configGUID);
         }
 
         /// <summary>
@@ -95,10 +85,9 @@ namespace ConfigSync
         /// </summary>
         /// <param name="name"></param>
         /// <returns>Returns an existing Configuration matching the provided name</returns>
-        public static Configuration GetConfigOfName(string name)
+        public static Configuration? GetConfigOfName(string name)
         {
-            // If this was lua I could do GetConfigFromVar(string variable) and do match[variable] but this is not lua i miss lua kinda a bit
-            return configList.Find(match => match.ConfigName == name);
+            return ConfigList.Find(match => match.ConfigName == name);
         }
 
         /// <summary>
@@ -106,9 +95,9 @@ namespace ConfigSync
         /// </summary>
         /// <param name="GUID"></param>
         /// <returns>Returns an existing Configuration matching the provided GUID</returns>
-        public static Configuration GetConfigOfGUID(string GUID)
+        public static Configuration? GetConfigOfGUID(string GUID)
         {
-            return configList.Find(match => match.ConfigGUID == GUID);
+            return ConfigList.Find(match => match.ConfigGUID == GUID);
         }
     }
 }
