@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using MyceliumNetworking;
+using UnityEngine;
 using Steamworks;
 
 /*
@@ -31,7 +32,7 @@ namespace ConfigSync
 
             foreach (Configuration configuration in ConfigList)
             {
-                ConfigStartup.RPCTargetRelay(nameof(ConfigStartup.ReceiveSync), cSteamID, configuration.ConfigGUID, configuration.ConfigType, configuration.CurrentValue);
+                ConfigRPC.RPCTargetRelay(nameof(ConfigRPC.ReceiveSync), cSteamID, configuration.ConfigGUID, configuration.ConfigType, configuration.CurrentValue);
             }
         }
 
@@ -58,7 +59,7 @@ namespace ConfigSync
         {
             if (!MyceliumNetwork.InLobby)
             {
-                ConfigStartup.Logger.LogWarning($"SyncConfig called but was not in lobby!");
+                Debug.LogWarning($"[ConfigSync] SyncConfig called but was not in lobby!");
                 return;
             }
 
@@ -72,12 +73,12 @@ namespace ConfigSync
                     if (MyceliumNetwork.LobbyHost == cSteamID)
                         continue;
 
-                    ConfigStartup.RPCTargetRelay(nameof(ConfigStartup.ReceiveSync), cSteamID, configGUID, config.ConfigType, value!);
+                    ConfigRPC.RPCTargetRelay(nameof(ConfigRPC.ReceiveSync), cSteamID, configGUID, config.ConfigType, value!);
                 }
                 return;
             }
 
-            ConfigStartup.RPCTargetRelay(nameof(ConfigStartup.RequestSync), MyceliumNetwork.LobbyHost, configGUID);
+            ConfigRPC.RPCTargetRelay(nameof(ConfigRPC.RequestSync), MyceliumNetwork.LobbyHost, configGUID);
         }
 
         /// <summary>

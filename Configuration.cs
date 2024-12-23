@@ -1,4 +1,5 @@
 ﻿using MyceliumNetworking;
+using UnityEngine;
 using System;
 
 namespace ConfigSync
@@ -18,7 +19,7 @@ namespace ConfigSync
             CurrentValue = initialValue;
             ConfigType = initialValue.GetType();
 
-            ConfigStartup.Logger.LogDebug($"Config created by end user, initial value: {initialValue}");
+            Debug.Log($"[ConfigSync] Config created by end user, initial value: {initialValue}");
 
             Synchronizer.ConfigList.Add(this);
 
@@ -35,7 +36,7 @@ namespace ConfigSync
         /// <param name="value"></param>
         internal void UpdateValue(object value)
         {
-            ConfigStartup.Logger.LogDebug($"Current value updated internally, new value: {value}, old value: {CurrentValue}");
+            Debug.Log($"[ConfigSync] Current value updated internally, new value: {value}, old value: {CurrentValue}");
             CurrentValue = value;
             ConfigChanged?.Invoke(CurrentValue);
         }
@@ -50,11 +51,11 @@ namespace ConfigSync
             InitialValue = value;
             if (MyceliumNetwork.InLobby && !MyceliumNetwork.IsHost)
             {
-                ConfigStartup.Logger.LogDebug($"Current value tried to be set by end user, but is in lobby without being a host, value: {value}");
+                Debug.Log($"[ConfigSync] Current value tried to be set by end user, but is in lobby without being a host, value: {value}");
                 return;
             }
 
-            ConfigStartup.Logger.LogDebug($"Current value set by end user, value: {value}");
+            Debug.Log($"[ConfigSync] Current value set by end user, value: {value}");
             CurrentValue = value;
             if (MyceliumNetwork.InLobby && MyceliumNetwork.IsHost)
             {
